@@ -10,6 +10,8 @@ export default class MainScene extends Phaser.Scene {
     super({ key: "MainScene" });
     this.elementsY = elementsY;
     this.isStarted = false;
+    this.isFinished = false;
+    this.hasCupRaised = false;
     this.isLost = false;
     this.isWon = false;
     this.state = "START";
@@ -24,35 +26,21 @@ export default class MainScene extends Phaser.Scene {
       this.animateFullCircle.bind(this)
     ];
   }
-  drawBgAndLogo(){
-    //test to add an image
-    return new Promise( resolve => {
-      const bg = this.add.image(800,600 ,"bg")
-      bg.setDepth(-1);
-      bg.setScale(0.5,0.5)
-      bg.setPosition(0,0)
-      const button = this.add.image(200, 50, 'logo');
-      button.setInteractive()
-      button.on('pointerdown', onClick)
-      function onClick(){
-        console.log("Start button pressed")
-        resolve()} 
-      
-      }  )
-    
- 
 
-  }
 async preload(){
 
 }
   async create() {
     
     this.fpsText = new FpsText(this)
-    this.startButton = new StartButton(this)
+    this.startButton = new StartButton(this) 
     let { width, height } = this.sys.game.canvas;
     this.width = width;
-    this.height = height;
+    this.height = height; 
+    const bg = this.add.image(800,600 ,"bg")
+    bg.setDepth(-1);
+    bg.setScale(0.5,0.5)
+    bg.setPosition(0,0)
     this.startingXPosition =
       this.numOfCups === 3
         ? 560
@@ -63,15 +51,26 @@ async preload(){
             : 20;
     this.createCups();
     this.createBall();
-    await this.drawBgAndLogo()
+    await this.createButton();
     await this.raiseTheCup(this.cups[this.winningCup - 1]);
-    //this.ball.alpha = 0 //hide the ball during the movements
+    this.ball.alpha = 0 //hide the ball during the movements
     this.ball.x = -9999;
     this.moveTheCups();
   }
  update() {
-    this.isStarted = true;
     this.fpsText.update()
+  }
+  createButton(){
+    return new Promise( resolve => {
+      const button = this.add.image(200, 50, 'logo');
+      button.setInteractive()
+      button.on('pointerdown', onClick.bind(this))
+      function onClick(){
+        console.log("Start button pressed")
+       this.isStarted = true;
+       resolve();
+      } 
+    })
   }
 
   createCups() {
@@ -90,18 +89,17 @@ async preload(){
       cup.setDepth(1);
       cup.on("pointerdown", function () {
         console.log(this.name, this.hasBall)
-        if (that.isStarted)
-          return console.log("Click is disabled while the cups are moving");
+        if (!that.isFinished)
+          return console.log("You can't raise the cups until the game has finished");
         if (that.isLost) return console.log("You already had your chance! ;-)");
         if (that.isWon)
           return console.log("You Won, what do you want more??! ;-)");
-        console.log(this.hasBall ? "You win!" : "You lose!");
         if (!this.hasBall) { //This block happens if you don't pick the right cup
           that.isLost = true;
           that.raiseTheCup(this);
           setTimeout(() => {
             that.raiseTheCup(that.cups[that.winningCup - 1]);
-          }, 2000)
+          }, 1000)
           that.winAnimation()
         }
         else { //This block happens if you pick the right cup
@@ -109,6 +107,7 @@ async preload(){
           that.raiseTheCup(that.cups[that.winningCup - 1]);
           that.loseAnimation();
         }
+        
       });
       this.cups.push(cup);
     }
@@ -175,6 +174,7 @@ async preload(){
       index0 = null;
       index1 = null;
       if (i === this.numberOfMoves - 1) {
+        this.isFinished = true;
         this.isStarted = false; //Stops the game enabling the click
         this.state = "END";
         //console.log(i, this.isStarted);
