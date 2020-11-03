@@ -36,17 +36,15 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.on('complete', this.complete, this);
 
 
-    const assetsArr = [['bg', 'src/assets/img/bg.jpg'], ['logo', 'src/assets/img/logo.png'], ['ball', 'src/assets/img/ball.png'], ['cup', 'src/assets/img/cup.png']]
+    const assetsArr = [['table', 'src/assets/img/table.png'],['bg', 'src/assets/img/bg.jpg'], ['logo', 'src/assets/img/logo.png'], ['ball', 'src/assets/img/ball.png'], ['cup', 'src/assets/img/cup.png']]
     for (let i = 0; i < assetsArr.length; i++) {
       this.load.image(assetsArr[i][0], assetsArr[i][1]);
     }
   }
 
-  async create() {
+  create() {
     console.log("Game starting")
-    this.scene.stop("LoadBgScene")
-    this.scene.stop("PreloadScene")
-    this.scene.launch('MainScene')
+    this.scene.start('MainScene')
   }
 
 

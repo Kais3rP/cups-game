@@ -19,6 +19,6 @@ export default class PreloadScene extends Phaser.Scene {
       bg.setDepth(-1);
       bg.setScale(1.5)
   
-      this.scene.launch('PreloadScene')
+      this.scene.launch('PreloadScene')//Start shuts down the current scene too
     }
 }

@@ -5,7 +5,7 @@ import FpsText from '../objects/FpsText'
 
 export default class MainScene extends Phaser.Scene {
   
-  constructor( numOfCups = 4, winningCup = 2, numberOfMoves = 10, elementsY = 500, cupDistance = 200) {
+  constructor( numOfCups = 3, winningCup = 2, numberOfMoves = 1, elementsY = 500, cupDistance = 200) {
     console.log("inside level")
     super({ key: "MainScene" });
     this.elementsY = elementsY;
@@ -28,40 +28,66 @@ export default class MainScene extends Phaser.Scene {
     ];
     this.fpsText=""
   }
-
-async preload(){
+init(){
+  console.log("inside init")
+}
+ preload(){
   this.fpsText = new FpsText(this)
+  let { width, height } = this.sys.game.canvas;
+  this.width = width;
+  this.height = height; 
 }
   async create() {    
-    let { width, height } = this.sys.game.canvas;
-    this.width = width;
-    this.height = height; 
-    console.log(width,height)
-    this.cameras.main.setBounds(0, 0, this.width, this.height)
-    this.physics.world.setBounds(0, 0, this.width, this.height)
-    const bg = this.add.image(0,0 ,"bg")
-    bg.setDepth(-1);
-   bg.setScale(0.5,0.5)
+    console.log("inside create")
+    //Resetting values
+    this.isStarted = false;
+    this.isFinished = false;
+    this.hasCupRaised = false;
+    this.isLost = false;
+    this.isWon = false;
+    this.state = "START";
+
+    //---------------------------------
     this.startingXPosition = (this.width -(this.cupDistance*(this.numOfCups-1)))/2;
+    //this.cameras.main.setBounds(0, 0, this.width, this.height)
+    //this.physics.world.setBounds(0, 0, this.width, this.height)
+    const bg = this.add.image(this.width/2,this.height/2 ,"bg")
+    bg.setDepth(-1);
+    //bg.setScale(1,1)
+    //bg.width=this.width;
+    //bg.height=300;
+    bg.displayWidth=this.width;
+    bg.displayHeight=this.height;
+    console.log(bg)
     this.createCups();
     this.createBall();
     await this.createButton();
+    console.log("button click resolved")
     await this.raiseTheCup(this.cups[this.winningCup - 1]);
     this.ball.alpha = 0 //hide the ball during the movements
     this.ball.x = -9999;
     this.moveTheCups();
   }
  update() {
+
     this.fpsText.update()
+      if (this.isLost || this.isWon){
+        console.log("restarting...")
+        //this.events.removeAllListeners();
+        this.scene.restart();      
+    }
   }
   createButton(){
+    console.log("inside create button")
     const that = this;
     return new Promise( resolve => {
-      const button = this.add.image(this.width/2-50, this.elementsY-200, 'logo');
+      const button = this.add.image(this.width/2, this.elementsY-200, 'logo');
+      button.setDepth(10)
       button.setInteractive()
-      button.on('pointerdown', onClick)
+      console.log("Setting the event listener")
+      button.once('pointerdown', onClick)
       function onClick(){
-        console.log("Start button pressed")
+        console.log("Start button pressed")        
        that.isStarted = true;
        this.setActive(false).setVisible(false);
        resolve();
@@ -74,6 +100,7 @@ async preload(){
   }
 
   createCups() {
+    console.log("inside create cups")
     const that = this;
     for (let i = 1; i <= this.numOfCups; i++) {
       const cup = this.add.image(
@@ -87,7 +114,7 @@ async preload(){
       cup.name = "cup" + i;
       cup.setInteractive();
       cup.setDepth(1);
-      cup.on("pointerdown", function () {
+      cup.on("pointerdown", async function () {
         console.log(this.name, this.hasBall)
         if (!that.isFinished)
           return console.log("You can't raise the cups until the game has finished");
@@ -95,17 +122,22 @@ async preload(){
         if (that.isWon)
           return console.log("You Won, what do you want more??! ;-)");
         if (!this.hasBall) { //This block happens if you don't pick the right cup
-          that.isLost = true;
-          that.raiseTheCup(this);
-          setTimeout(() => {
-            that.raiseTheCup(that.cups[that.winningCup - 1]);
-          }, 1000)
-          that.winAnimation()
+          
+          await that.raiseTheCup(this);
+          await new Promise ( resolve => { setTimeout( () => {
+             that.raiseTheCup(that.cups[that.winningCup - 1]);
+             resolve()
+          }, 400)
+        })
+          await that.loseAnimation();
+          console.log("Setting the lose state")
+         that.isLost = true;
         }
         else { //This block happens if you pick the right cup
+         
+          await that.raiseTheCup(that.cups[that.winningCup - 1]);
+          await that.winAnimation()
           that.isWon = true;
-          that.raiseTheCup(that.cups[that.winningCup - 1]);
-          that.loseAnimation();
         }
         
       });
@@ -125,9 +157,10 @@ async preload(){
   }
 
   raiseTheCup(cup) {
-    //console.log("inside the raise cup function");
+  
+    console.log("inside the raise cup function");
     this.ball.x = this.cups[this.winningCup - 1].x; //assigns to the ball the final position of the winning cup
-    this.ball.alpha = 700;
+    console.log("Changing ball props")
     return new Promise((resolve) => {
       let timeline = this.tweens.timeline({
         ease: "Power2",
@@ -136,7 +169,13 @@ async preload(){
             offset: 400,
             duration: 400,
             targets: cup,
-            y: this.elementsY - 250
+            y: this.elementsY - 250,
+            onStart: ()=>{
+              console.log("firts tween start")
+            },
+            onComplete: ()=>{
+              console.log("firts tween complete")
+            }
           },
           {
 
@@ -144,6 +183,9 @@ async preload(){
             duration: 200,
             targets: cup,
             y: this.elementsY,
+            onStart: ()=>{
+              console.log("second tween start")
+            },
             onComplete: () => {
               resolve("first animation resolved");
             }
@@ -153,11 +195,24 @@ async preload(){
     });
   }
 
-  winAnimation() { }
+  winAnimation() {
+    return new Promise( resolve =>{
+      setTimeout(()=>{ console.log("Win Animation")
+    resolve() },2000)
+    })
+    
+   }
 
-  loseAnimation() { }
+  async loseAnimation() { 
+
+    return new Promise( resolve =>{
+      setTimeout(()=>{ console.log("Lose Animation")
+    resolve() },2000)
+    })
+  }
 
   async moveTheCups() {
+    console.log("Inside move the cups")
     let index0 = null;
     let index1 = null;
     for (let i = 0; i < this.numberOfMoves; i++) {
