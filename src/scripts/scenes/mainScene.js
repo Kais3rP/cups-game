@@ -1,11 +1,11 @@
 //import PhaserLogo from '../objects/phaserLogo'
 import FpsText from '../objects/FpsText'
-import StartButton from '../objects/StartButton'
+//import StartButton from '../objects/StartButton'
 
 
 export default class MainScene extends Phaser.Scene {
-  fpsText
-  constructor(config, numOfCups = 4, winningCup = 2, numberOfMoves = 10, elementsY = 700) {
+  
+  constructor( numOfCups = 4, winningCup = 2, numberOfMoves = 10, elementsY = 500, cupDistance = 200) {
     console.log("inside level")
     super({ key: "MainScene" });
     this.elementsY = elementsY;
@@ -19,36 +19,30 @@ export default class MainScene extends Phaser.Scene {
     this.winningCup = winningCup;
     this.ball;
     this.startingXPosition = 0;
+    this.cupDistance = cupDistance;
     this.cups = [];
     this.numberOfMoves = numberOfMoves;
     this.animateArr = [
       this.animateSwap.bind(this),
       this.animateFullCircle.bind(this)
     ];
+    this.fpsText=""
   }
 
 async preload(){
-
+  this.fpsText = new FpsText(this)
 }
-  async create() {
-    
-    this.fpsText = new FpsText(this)
-    this.startButton = new StartButton(this) 
+  async create() {    
     let { width, height } = this.sys.game.canvas;
     this.width = width;
     this.height = height; 
-    const bg = this.add.image(800,600 ,"bg")
+    console.log(width,height)
+    this.cameras.main.setBounds(0, 0, this.width, this.height)
+    this.physics.world.setBounds(0, 0, this.width, this.height)
+    const bg = this.add.image(0,0 ,"bg")
     bg.setDepth(-1);
-    bg.setScale(0.5,0.5)
-    bg.setPosition(0,0)
-    this.startingXPosition =
-      this.numOfCups === 3
-        ? 560
-        : this.numOfCups === 4
-          ? 360
-          : this.numOfCups === 5
-            ? 160
-            : 20;
+   bg.setScale(0.5,0.5)
+    this.startingXPosition = (this.width -(this.cupDistance*(this.numOfCups-1)))/2;
     this.createCups();
     this.createBall();
     await this.createButton();
@@ -61,28 +55,34 @@ async preload(){
     this.fpsText.update()
   }
   createButton(){
+    const that = this;
     return new Promise( resolve => {
-      const button = this.add.image(200, 50, 'logo');
+      const button = this.add.image(this.width/2-50, this.elementsY-200, 'logo');
       button.setInteractive()
-      button.on('pointerdown', onClick.bind(this))
+      button.on('pointerdown', onClick)
       function onClick(){
         console.log("Start button pressed")
-       this.isStarted = true;
+       that.isStarted = true;
+       this.setActive(false).setVisible(false);
        resolve();
       } 
     })
+    
+   // this.startButton = new StartButton(this) 
+   
+    
   }
 
   createCups() {
     const that = this;
     for (let i = 1; i <= this.numOfCups; i++) {
       const cup = this.add.image(
-        this.startingXPosition + 400 * (i - 1),
+        this.startingXPosition + (this.cupDistance * (i-1)),
         this.elementsY,
         "cup"
       );
-      cup.scaleX = 0.15;
-      cup.scaleY = 0.15;
+      cup.scaleX = 0.1;
+      cup.scaleY = 0.1;
       cup.hasBall = i === this.winningCup ? true : false;
       cup.name = "cup" + i;
       cup.setInteractive();
@@ -393,51 +393,3 @@ async preload(){
 }
 
 
-/*export default class MainScene extends Phaser.Scene {
-  fpsText
-
-  constructor() {
-    super({ key: 'MainScene' })
-  }
-
-  create() {
-    /**
-     * Delete all the code below to start a fresh scene
-
-    new PhaserLogo(this, this.cameras.main.width / 2, 0)
-    this.fpsText = new FpsText(this)
-
-    // async/await example
-    const pause = ms => {
-      return new Promise(resolve => {
-        window.setTimeout(() => {
-          resolve()
-        }, ms)
-      })
-    }
-    const asyncFunction = async () => {
-      console.log('Before Pause')
-      await pause(4000) // 4 seconds pause
-      console.log('After Pause')
-    }
-    asyncFunction()
-
-    // Spread operator test
-    const numbers = [0, 1, 2, 3]
-    const moreNumbers = [...numbers, 4, 5]
-    console.log(`All numbers: ` + moreNumbers)
-
-    // display the Phaser.VERSION
-    this.add
-      .text(this.cameras.main.width - 15, 15, `Phaser v${Phaser.VERSION}`, {
-        color: '#000000',
-        fontSize: 24
-      })
-      .setOrigin(1, 0)
-  }
-
-  update() {
-    this.fpsText.update()
-  }
-}
-*/

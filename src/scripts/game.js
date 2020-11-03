@@ -3,13 +3,14 @@ import '@babel/polyfill'
 
 import MainScene from './scenes/mainScene'
 import PreloadScene from './scenes/preloadScene'
+import LoadBgScene from './scenes/LoadBgScene'
 
-const DEFAULT_WIDTH = 1920
-const DEFAULT_HEIGHT = 1080
+const DEFAULT_WIDTH = 1024
+const DEFAULT_HEIGHT = 768
 
 const config = {
   type: Phaser.AUTO,
-  backgroundColor: '#ffffff',
+  backgroundColor: '#000000',
   scale: {
     parent: 'phaser-game',
     mode: Phaser.Scale.FIT,
@@ -17,7 +18,7 @@ const config = {
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT
   },
-  scene: [PreloadScene, MainScene],
+  scene: [LoadBgScene,PreloadScene, MainScene],
   physics: {
     default: 'arcade',
     arcade: {

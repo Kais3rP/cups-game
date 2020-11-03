@@ -1,75 +1,74 @@
-import LoadingBar from "../objects/LoadingBar"
+
 
 export default class PreloadScene extends Phaser.Scene {
   constructor() {
     super({ key: 'PreloadScene' })
+
   }
 
   preload() {
+    //Add the loader
     let { width, height } = this.sys.game.canvas;
-    this.currentFileText = this.add.text(width/2, height/2+70,"", { fontSize: '32px', fill: '#000' });
-    this.currentPerc =  this.add.text(width/2+150, height/2-40,"", { fontSize: '32px', fill: '#000' });
-    this.add.text(width/2, height/2-40, 'Loading ', { fontSize: '32px', fill: '#000' });
     this.width = width;
     this.height = height;
+    //Text
+    this.currentFileText = this.add.text(width / 2 - 200, height / 2 + 70, "", { fontSize: '32px', fill: '#FFF' });
+    this.currentPerc = this.add.text(width / 2 + 150 - 200, height / 2 - 40, "", { fontSize: '32px', fill: '#FFF' });
+    this.add.text(width / 2 - 200, height / 2 - 40, 'Loading ', { fontSize: '32px', fill: '#FFF' });
+    //Progress  BAR
     this.progressBar = this.add.graphics();
+    this.progressBar.setDepth(1)
     this.progressBox = this.add.graphics();
-    this.progressBox.fillStyle(0x222222, 0.8);
-    this.progressBox.fillRect(width/2, height/2, 400, 50);
-   
-    this.load.on('start', function() {
+    this.progressBox.lineStyle(5, 0xFFFFFF, 1.0);
+    this.progressBox.fillStyle(0x000000, 1.0);
+    this.progressBox.fillRect(width/2-200, height/2, 400, 50);
+    this.progressBox.strokeRect(width/2-200, height/2, 400, 50);
+
+    this.load.on('start', function () {
       console.log("loading started")
     })
     this.load.on('progress', this.progress, this);
-    this.load.on('fileprogress', function(file){
+    this.load.on('fileprogress', function (file) {
       console.log(this.currentFileText.text)
       this.currentFileText.setText(file.src)
-      
-    },this);
+
+    }, this);
     this.load.on('complete', this.complete, this);
 
 
-    const assetsArr = [['bg', 'src/assets/img/bg.jpg'],['logo', 'src/assets/img/logo.png'],['ball', 'src/assets/img/ball.png'],['cup', 'src/assets/img/cup.png']]
-   
+    const assetsArr = [['bg', 'src/assets/img/bg.jpg'], ['logo', 'src/assets/img/logo.png'], ['ball', 'src/assets/img/ball.png'], ['cup', 'src/assets/img/cup.png']]
     for (let i = 0; i < assetsArr.length; i++) {
-        this.load.image(assetsArr[i][0], assetsArr[i][1]);
+      this.load.image(assetsArr[i][0], assetsArr[i][1]);
     }
-
-/*
-    this.load.image('bg', 'src/assets/img/bg.jpg');
-    this.load.image('logo', 'src/assets/img/logo.png');
-    this.load.image('ball', 'src/assets/img/ball.png');
-    this.load.image('cup', 'src/assets/img/cup.png');
-*/   
   }
 
-  create() {
-  this.scene.stop("PreloadScene")
+  async create() {
     console.log("Game starting")
-      this.scene.launch('MainScene')
+    this.scene.stop("LoadBgScene")
+    this.scene.stop("PreloadScene")
+    this.scene.launch('MainScene')
   }
+
+
   progress(prog) {
-    console.log("in progress",prog)
+    console.log("in progress", prog)
     this.progressBar.clear();
-    this.progressBar.fillStyle(0x000000, 1);
-    this.progressBar.fillRect(this.width/2, this.height/2, 400 * prog, 50);
-    this.currentPerc.setText(prog*100+"%")
-    
-  
+    this.progressBar.fillStyle(0xFFFFFF, 0.8);
+    this.progressBar.fillRect(this.width / 2 - 200, this.height / 2, 400 * prog, 50);
+    this.currentPerc.setText(prog * 100 + "%")
+
+
   }
   fileProgress(file) {
-    console.log("in progress",prog)
+    console.log("in progress", prog)
     this.progressBar.clear();
     this.progressBar.fillStyle(0x000000, 1);
-    this.progressBar.fillRect(this.width/2, this.height/2, 400 * prog, 50);
-    
-  
+    this.progressBar.fillRect(this.width / 2, this.height / 2, 400 * prog, 50);
+
+
   }
   complete() {
     console.log("Loading finished")
-    this.progressBar.destroy()
-    this.progressBar.destroy()
-    this.currentFileText.destroy()
   }
   /**
    * This is how you would dynamically import the mainScene class (with code splitting),
