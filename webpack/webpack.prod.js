@@ -8,7 +8,8 @@ const prod = {
   mode: 'production',
   output: {
     filename: '[name].[contenthash].bundle.js',
-    chunkFilename: '[name].[contenthash].chunk.js'
+    chunkFilename: '[name].[contenthash].chunk.js',
+    //path: path.resolve(__dirname, '../dist'),
   },
   optimization: {
     splitChunks: {
