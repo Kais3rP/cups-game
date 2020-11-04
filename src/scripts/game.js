@@ -4,7 +4,7 @@ import '@babel/polyfill'
 import MainScene from './scenes/MainScene'
 import PreloadScene from './scenes/PreloadScene'
 import LoadBgScene from './scenes/LoadBgScene'
-import TestScene from './scenes/TestScene'
+
 
 const DEFAULT_WIDTH = 1024
 const DEFAULT_HEIGHT = 768
