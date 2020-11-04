@@ -21,8 +21,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.progressBox = this.add.graphics();
     this.progressBox.lineStyle(5, 0xFFFFFF, 1.0);
     this.progressBox.fillStyle(0x000000, 1.0);
-    this.progressBox.fillRect(width/2-200, height/2, 400, 50);
-    this.progressBox.strokeRect(width/2-200, height/2, 400, 50);
+    this.progressBox.fillRect(width / 2 - 200, height / 2, 400, 50);
+    this.progressBox.strokeRect(width / 2 - 200, height / 2, 400, 50);
 
     this.load.on('start', function () {
       console.log("loading started")
@@ -36,17 +36,42 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.on('complete', this.complete, this);
 
 
-    const assetsArr = [['table', 'src/assets/img/table.png'],['bg', 'src/assets/img/bg.jpg'], ['logo', 'src/assets/img/logo.png'], ['ball', 'src/assets/img/ball.png'], ['cup', 'src/assets/img/cup.png']]
-    for (let i = 0; i < assetsArr.length; i++) {
-      this.load.image(assetsArr[i][0], assetsArr[i][1]);
+    const assetsArr = [
+      ['applause', 'src/assets/sound/applause.mp3'],
+      ['boo', 'src/assets/sound/boo.mp3'],
+      ['slide', 'src/assets/sound/slide.mp3'],
+      ['table', 'src/assets/img/table.png'],
+      ['bg', 'src/assets/img/bg.jpg'],
+      ['logo', 'src/assets/img/logo.png'],
+      ['ball', 'src/assets/img/ball.png'],
+      ['cup', 'src/assets/img/cup.png']]
+
+
+    for (let asset of assetsArr) {
+      switch (asset[1].match(/\.\w{3}$/)[0]) {
+        case ".mp3": this.load.audio(asset[0], asset[1]);
+          break;
+        case ".wav": this.load.audio(asset[0], asset[1]);
+          break;
+        case ".png": this.load.image(asset[0], asset[1]);
+          break;
+        case ".jpg": this.load.image(asset[0], asset[1]);
+          break;
+
+      }
+
     }
   }
 
   create() {
     console.log("Game starting")
-    this.scene.start('MainScene')
+    this.scene.stop("LoadBgScene")
+    this.scene.stop("PreloadScene")
+    this.scene.launch('MainScene')
   }
-
+  update() {
+    console.log("updating preload scene...")
+  }
 
   progress(prog) {
     console.log("in progress", prog)
