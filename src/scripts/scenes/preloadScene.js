@@ -40,6 +40,7 @@ export default class PreloadScene extends Phaser.Scene {
       ['applause', 'src/assets/sound/applause.mp3'],
       ['boo', 'src/assets/sound/boo.mp3'],
       ['slide', 'src/assets/sound/slide.mp3'],
+      ['raise', 'src/assets/sound/raise.mp3'],
       ['table', 'src/assets/img/table.png'],
       ['bg', 'src/assets/img/bg.jpg'],
       ['logo', 'src/assets/img/logo.png'],

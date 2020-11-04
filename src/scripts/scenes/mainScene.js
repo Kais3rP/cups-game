@@ -87,6 +87,7 @@ export default class MainScene extends Phaser.Scene {
     this.applause  = this.sound.add("applause");
     this.boo  = this.sound.add("boo");
     this.slide  = this.sound.add("slide");
+    this.raise  = this.sound.add("raise");
   }
   createBg() {
     const bg = this.add.image(this.width / 2, this.height / 2, "bg")
@@ -186,6 +187,7 @@ export default class MainScene extends Phaser.Scene {
             targets: cup,
             y: this.elementsY - 250,
             onStart: () => {
+              this.raise.play()
               console.log("firts tween start")
             },
             onComplete: () => {
@@ -202,6 +204,7 @@ export default class MainScene extends Phaser.Scene {
               console.log("second tween start")
             },
             onComplete: () => {
+              this.raise.stop()
               console.log("second tween completed")
               resolve("first animation resolved");
             }
