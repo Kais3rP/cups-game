@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "build": "npm install && webpack --config webpack/webpack.prod.js",
+    "build": "npm install && npx webpack --config webpack/webpack.prod.js",
     "start-webpack-dev-server": "webpack-dev-server --config webpack/webpack.dev.js",
     "bundle": "npm run build",
     "serve": "serve dist",
@@ -36,7 +36,7 @@
     "author": "Yannick Deubel (https://github.com/yandeu)"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": "10.x"
   },
   "license": "MIT",
   "devDependencies": {
