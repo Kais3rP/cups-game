@@ -45,13 +45,13 @@ export default class MainScene extends Phaser.Scene {
 
   create() {
     console.log("inside create")
-    this.resetState();
+    
     this.createBg();
     this.createCups();
     this.createBall();
     this.createButton();
     this.createSounds();
-    
+    this.initAndResetState();
 
   }
 
@@ -64,11 +64,11 @@ export default class MainScene extends Phaser.Scene {
     }
     if (this.isLost || this.isWon) {
       console.log("restarting...")
-      this.resetState()     
+      this.initAndResetState()     
     }
   }
 
-  resetState() {
+  initAndResetState() {
     this.isStarted = false;
     this.hasToStart = false;
     this.isFinished = false;
@@ -77,6 +77,12 @@ export default class MainScene extends Phaser.Scene {
     this.isWon = false;
     this.state = "START";
     this.winningCup = Phaser.Math.Between(1, this.numOfCups);
+    this.resetWinningCup()
+  }
+  resetWinningCup(){
+    for (let i = 0; i < this.numOfCups; i++) {   
+      this.cups[i].hasBall = i === this.winningCup-1 ? true : false;
+    }
   }
   async startGame() {
     await this.raiseTheCup(this.cups[this.winningCup - 1]);
@@ -121,12 +127,10 @@ export default class MainScene extends Phaser.Scene {
       );
       cup.scaleX = 0.1;
       cup.scaleY = 0.1;
-      cup.hasBall = i === this.winningCup ? true : false;
       cup.name = "cup" + i;
       cup.setInteractive();
       cup.setDepth(1);
       cup.on("pointerdown", async function () {
-        console.log(this.name, this.hasBall)
         if (!that.isFinished)
           return console.log("You can't raise the cups until the game has finished");
         if (that.isLost) return console.log("You already had your chance! ;-)");
