@@ -9,6 +9,9 @@ app.get('/',function(req,res){
     res.sendFile(__dirname + '/dist/index.html');
 });
 
-server.listen(5000,function(){ // Listens to port 5000
+server.listen(process.env.PORT || 5000,function(){//Heroku wants its own env PORT
     console.log('Listening on '+server.address().port);
 });
+
+
+
